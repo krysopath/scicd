@@ -1,0 +1,24 @@
+---
+scicd:
+  state: present
+
+admin_user:
+  name: scicd
+  group: scicd
+  groups: adm,dialout,cdrom,floppy,sudo,audio,dip,video,plugdev,netdev
+  comment: "admin"
+  generate_ssh_key: yes
+  ssh_key_bits: 4096
+  ssh_key_file: .ssh/id_rsa
+  shell: /bin/bash
+  home: "/home/scicd"
+  bash_aliases_path: "~/.bash_aliases"
+  bash_aliases:
+  - {alias: "apt-get-installed", cmd: "gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u"}
+  - {alias: "ducks", cmd: "du -cks * | sort -rn | head"}
+  - {alias: "wanip", cmd: "dig +short myip.opendns.com @resolver1.opendns.com"}
+  - {alias: "islisten", cmd: "netstat -tulpena | grep LISTEN"}
+  - {alias: "ecr-token", cmd: "aws ecr get-login --no-include-email --region eu-central-1"}
+  authorized_keys:
+  - "ssh-rsa  AAAAB3NzaC1yc2EAAAADAQABAAACAQC2W744zq4uIU/dQsSdGeweFPE+w3p3bLD/LEGQoMcsyrlxTwEZJfq1petcH5gEgH2n0T2SyFJ+AtIFbuxZXfSrCg/UJj9M6dirBdFAjPMHwl5pLJcyCoos7h+NosHn8o+1t0U76rp0pzTgMfwb8mX5M1Wigl7wrTt0w9+qHNcFIVtMPv7KTtfPunkkZtzd3kk1QoE6muRTRpm6CKDwI/AO77qW/TQtwhTpXZnQD8BPlQx7rDliC6hFeqP2ARnvdyAOQmjSEJvq3whD+GnkxMpN3RdboJBaEZcRkDug1ZvawYHf0zfz4DFyb+5RmGFxPG5gDftgFOYL/YfaIu/qj5t41xKm4xFS9bQBCA86a8gaRTWIbrc133E1b/c1WnWVfbvCRae7wP5eAUfTMYndGFHu4hCm+PwVSUvwXhAZJniSpajjZYJO7flmCegYD5dNu7QXU5GBp39v9pDbGSxErRen+0XDF1pIpW/YBrgDoJiuG8ZyzBZujHjkOeGFGj99pngZp29dAPMgFZw3jGJ91uRddDzLTodA2eQQgOQJHv2yUpHoBXZZq0SJe9U6ohAndIsJ9jqLdGAkqlYDPHKqjZ4TDjKNXpS6U0n1mbNIfw0Vsp50t1QZ5L38KKnZuJvPhKa+SI9Nc2QtYBX/ourMGCNUst5J9IWlkbRaj/fEnrzFjw== scicd@endtropi"
+# these will be auto installed with apt

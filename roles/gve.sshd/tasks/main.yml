@@ -1,0 +1,3 @@
+---
+- name: including sshd tasks
+  include_tasks: sshd.yml

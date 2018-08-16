@@ -1,0 +1,62 @@
+---
+- name: install Packages needed
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  become: true
+  with_items: "{{ load_db.packages }}"
+
+- name: dump db {{ load_db.from.database }} from {{ load_db.from.login_host }}
+  mysql_db:
+    login_host: "{{ load_db.from.login_host }}"
+    login_port: "{{ load_db.from.login_port }}"
+    login_user: "{{ load_db.from.login_user }}"
+    login_password: "{{ load_db.from.login_password }}"
+    name: "{{ load_db.from.database }}"
+    single_transaction: true
+    state: dump
+    target: "{{ load_db.dump_file }}"
+
+- name: remove db {{ load_db.to.database }} from {{load_db.to.login_host}}
+  mysql_db:
+    login_host: "{{ load_db.to.login_host }}"
+    login_port: "{{ load_db.to.login_port }}"
+    login_user: "{{ load_db.to.login_user }}"
+    login_password: "{{ load_db.to.login_password }}"
+    name: "{{ load_db.to.database }}"
+    state: absent
+
+- name: load db {{ load_db.from.database }}
+  mysql_db:
+    login_host: "{{ load_db.to.login_host }}"
+    login_port: "{{ load_db.to.login_port }}"
+    login_user: "{{ load_db.to.login_user }}"
+    login_password: "{{ load_db.to.login_password }}"
+    name: "{{ load_db.to.database }}"
+    state: import
+    collation: utf8_unicode_ci
+    encoding: utf8
+    target: "{{ load_db.dump_file }}"
+
+- name: Create Mysql Script for Loading Orgs
+  template:
+    src: set_orgs.sql.j2
+    dest: /tmp/set_orgs.sql
+
+- name: Load Django Sites
+  mysql_db:
+    login_host: "{{ load_db.to.login_host }}"
+    login_port: "{{ load_db.to.login_port }}"
+    login_user: "{{ load_db.to.login_user }}"
+    login_password: "{{ load_db.to.login_password }}"
+    name: "{{ load_db.to.database }}"
+    state: import
+    target: "/tmp/set_orgs.sql"
+
+
+# - name: Remove db dump again
+#   file:
+#     state: absent
+#     path: "{{ load_db.dump_file }}"
+#

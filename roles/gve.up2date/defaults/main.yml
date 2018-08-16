@@ -1,0 +1,13 @@
+---
+state: present
+up2date:
+  env_packages:
+    apt:
+    - fail2ban
+    - pass
+    - logwatch
+    - tmux
+    - gnupg
+    - mtr
+    pip:
+    - ansible

@@ -1,0 +1,8 @@
+exclude_paths:
+  - ./gitlab-ci.yml
+parseable: false
+quiet: false
+use_default_rules: true
+skip_list:
+  - ANSIBLE0012
+verbosity: 1

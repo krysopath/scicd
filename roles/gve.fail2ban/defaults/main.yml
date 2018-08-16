@@ -1,0 +1,30 @@
+---
+
+
+sshd:
+  # these settings will  be added to ssh server config file
+  conf: "/etc/ssh/sshd_config"
+  Port: 22
+  PasswordAuthentication: "no"
+  PermitRootLogin: "prohibit-password"
+  PermitTunnel: "no"
+  MaxAuthTries: 2
+  MaxSessions: 2
+  AllowAgentForwarding: "yes"
+  AllowTcpForwarding: "yes"
+  X11Forwarding: "yes"
+  PermitTTY: "yes"
+  TCPKeepAlive: "yes"
+  LoginGraceTime: "2m"
+  StrictModes: "yes"
+  PermitUserEnvironment: "no"
+  Compression: "delayed"
+  ClientAliveInterval: 0
+  ClientAliveCountMax: 3
+  UseDNS: "no"
+  AuthorizedKeysCommand: "none"
+  AuthorizedKeysCommandUser: "nobody"
+  AuthorizedKeysFile: "/etc/ssh/authorized_keys/%u"
+  remote_users_allowed:
+  - "scicd"
+  - "ubuntu"

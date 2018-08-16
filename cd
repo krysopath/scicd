@@ -1,0 +1,8 @@
+#!/bin/bash
+watchmedo \
+  shell-command \
+  --recursive \
+  --pattern="*.yml,*cfg" \
+  --ignore-directories \
+  --command="./pipeline ${*}" \
+  .

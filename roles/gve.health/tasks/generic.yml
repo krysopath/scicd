@@ -1,0 +1,18 @@
+---
+# installing cronjobs to reduce instability
+
+- name: rendering fs_health script
+  become: yes
+  template:
+    src: templates/fs_health.sh.j2
+    dest: /usr/local/bin/fs_health
+    owner: root
+    group: root
+    mode: 0655
+    backup: "{{ general.do_ansible_backups }}"
+
+- name: run fs_health each hour
+  cron:
+    name: "check storage devices"
+    minute: "0,30"
+    job: "/usr/local/bin/fs_health"

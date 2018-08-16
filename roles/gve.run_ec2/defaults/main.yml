@@ -1,0 +1,16 @@
+---
+region: "eu-central-1"
+sec_group: "sg-ba5a7cd0"
+instance_type: "t2.nano"
+image: "ami-af79ebc0"
+vpc_id: "vpc-bda86bd6"
+subnet_id: "subnet-543df329"
+ssh_key_name: "control"
+server_name: "mesopelagic"
+itags:
+  Name: "{{ server_name }}"
+  Env: "meso"
+  Group: "ci"
+  Use: "testing"
+count_tag_tag: "{{ itags.env }}"
+n_instances: 1

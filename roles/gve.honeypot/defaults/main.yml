@@ -1,0 +1,7 @@
+---
+state: present
+honeypot:
+  fake_user:
+    name: "admin"
+    comment: "admin@localhost"
+    homedir: "/home/admin"

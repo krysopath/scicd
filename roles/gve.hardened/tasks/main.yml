@@ -1,0 +1,9 @@
+---
+- name: including generic tasks
+  include_tasks: generic.yml
+
+- name: including arpwatch tasks
+  include_tasks: arpwatch.yml
+
+- name: including usb tasks
+  include_tasks: disable_usb.yml

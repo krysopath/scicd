@@ -1,0 +1,14 @@
+---
+  # fail2ban sets up log parsing and iptable-drops offending ips
+  # with configurable policies
+  # fail2ban brings good defaults but we
+  # cleanly create a local jail file for the greater good.
+- name: render local jail
+  become: yes
+  template:
+    src: templates/jail-debian.local.j2
+    dest: /etc/fail2ban/jail.d/jail-debian.local
+    owner: root
+    group: root
+    mode: 0640
+  notify: restart fail2ban

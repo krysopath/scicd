@@ -1,0 +1,16 @@
+---
+  # some no brainer features and foolhardy kernel features,
+  # need to be enabled manually.
+  # research each setting individually before using them.
+  # defaults prevent source routing of incoming packets
+  # and log all malformed IPs
+
+- name: adding options to sysctl.conf for securing the network layer
+  become: yes
+  sysctl:
+    name: "{{ item.split(' = ')[0] }}"
+    value: "{{ item.split(' = ')[1] }}"
+    sysctl_set: yes
+    state: "{{ state }}"
+    reload: yes
+  with_items: "{{ selected_profile }}"

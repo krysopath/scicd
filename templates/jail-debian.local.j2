@@ -1,0 +1,32 @@
+# render  to /etc/fail2ban/jail.d/jail-debian.local
+
+[sshd]
+port = {{hardened.sshd.Port}}
+maxentry = 3
+
+# [nginx-http-auth]
+# enabled  = true
+# filter   = nginx-http-auth
+# port     = http,https
+# logpath  = /var/log/nginx/error.log
+
+# [nginx-badbots]
+# enabled  = true
+# port     = http,https
+# filter   = nginx-badbots
+# logpath  = /var/log/nginx/access.log
+# maxretry = 2
+
+# [nginx-noproxy]
+# enabled  = true
+# port     = http,https
+# filter   = nginx-noproxy
+# logpath  = /var/log/nginx/access.log
+# maxretry = 2
+
+# [nginx-nohome]
+# enabled  = true
+# port     = http,https
+# filter   = nginx-nohome
+# logpath  = /var/log/nginx/access.log
+# maxretry = 2

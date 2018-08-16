@@ -1,0 +1,6 @@
+ufw:
+  allow_ports:
+    - 80/tcp
+    - 443/tcp
+  allow_nets:
+    - 172.31.0.0/16

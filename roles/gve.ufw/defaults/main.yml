@@ -1,0 +1,16 @@
+ufw:
+  defaults_path: "/etc/default/ufw"
+  allow_ssh: true
+  logging: "on"
+  defaults:
+    IPV6: "yes"
+    DEFAULT_INPUT_POLICY: '"DROP"'
+    DEFAULT_OUTPUT_POLICY: '"ACCEPT"'
+    DEFAULT_FORWARD_POLICY: '"DROP"'
+  dropped_source:
+  allow_ports:
+  allow_nets:
+    - 10.0.0.0/8
+    - 172.31.0.0/16
+    - 192.168.0.0/16
+  complex:

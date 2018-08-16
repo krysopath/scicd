@@ -1,0 +1,4 @@
+load_db:
+  packages:
+    - mysql-client
+    - python-mysqldb

@@ -1,0 +1,17 @@
+---
+# openssh server is expected to be running already
+# so it has a live config, which we edit a bit manually here
+# instead of rendering a template
+
+- name: create fake user
+  become: yes
+  user:
+    state: "{{ state }}"
+    system: no
+    name: "{{ honeypot.fake_user.name }}"
+    comment: "{{ honeypot.fake_user.comment }}"
+    generate_ssh_key: yes
+    ssh_key_bits: 4096
+    ssh_key_file: .ssh/id_rsa
+    shell: /bin/bash
+    home: "{{ honeypot.fake_user.homedir }}"

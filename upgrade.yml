@@ -1,0 +1,17 @@
+---
+- hosts: ops
+  gather_facts: False
+  pre_tasks:
+  - name: Install python for Ansible
+    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+    register: output
+    changed_when: output.stdout != ""
+    become: true
+    ignore_errors: true
+    tags: always
+  - name: Gather Facts after inital Setup
+    setup:
+    tags: always
+  roles:
+  - role: gve.up2date
+    become: true

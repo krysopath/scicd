@@ -1,0 +1,46 @@
+---
+- name: Start ec2
+  ec2:
+    wait: yes
+    assign_public_ip: yes
+    aws_access_key: "{{ aws.access }}"
+    aws_secret_key: "{{ aws.secret }}"
+    key_name: "{{ ssh_key_name }}"
+    instance_type: "{{ instance_type }}"
+    image: "{{ image }}"
+    group_id: "{{ sec_group }}"
+    count_tag:
+      Group: "{{ itags.Group }}"
+      Env: "{{ itags.Env }}"
+    exact_count: "{{ n_instances }}"
+    vpc_subnet_id: "{{ subnet_id }}"
+    region: "{{ region }}"
+    instance_tags:
+      Name: "{{ itags.Name }}"
+      Env: "{{ itags.Env }}"
+      Group: "{{ itags.Group }}"
+      Use: "{{ itags.Use }}"
+  register: ec2_result
+
+- name: Add new instance to inventory group
+  add_host:
+    hostname: "{{ item.public_ip }}"
+    groupname: launched
+  with_items: "{{ ec2_result.tagged_instances }}"
+
+- name: Wait for SSH to come up
+  wait_for:
+    host:  "{{ item.public_ip }}"
+    port: 22
+    delay: 40
+    timeout: 320
+    state: started
+  with_items: "{{ ec2_result.tagged_instances }}"
+
+- name: Removing the ssh hostkey
+  command: ssh-keygen -R "{{ item.public_ip }}"
+  with_items: "{{ ec2_result.tagged_instances }}"
+
+- name: Updating the ssh hostkey
+  command: ssh-keyscan -H "{{ item.public_ip }}"
+  with_items: "{{ ec2_result.tagged_instances }}"

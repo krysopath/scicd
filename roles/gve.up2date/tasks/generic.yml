@@ -1,0 +1,29 @@
+---
+  # some no brainer features and foolhardy kernel features,
+  # need to be enabled manually.
+  # research each setting individually before using them.
+  # defaults prevent source routing of incoming packets
+  # and log all malformed IPs
+
+- name: bringing the operating system packages up2date
+  become: true
+  apt:
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400
+
+- name: providing os packages
+  become: true
+  apt:
+    name: "{{ item }}"
+    state: "{{ state }}"
+    update_cache: yes
+    cache_valid_time: 86400
+  with_items: "{{ up2date.env_packages.apt }}"
+
+- name: providing pip packages
+  become: true
+  apt:
+    name: "{{ item }}"
+    state: "{{ state }}"
+  with_items: "{{ up2date.env_packages.pip }}"

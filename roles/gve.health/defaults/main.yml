@@ -1,0 +1,12 @@
+---
+health:
+  state: present
+
+creds:
+  aws_ses:
+    smtp: "smtp.bla.com"
+    port: "587"
+    iam_user: "ACCESS"
+    secret: "SECRET"
+    sender: "sender@host.com"
+    cc: "reciepient@host.com"

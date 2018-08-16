@@ -1,0 +1,105 @@
+---
+hardened:
+  general:
+    do_backups: true
+  admin_user:
+    name: scicd
+    group: scicd
+    groups: adm,dialout,cdrom,floppy,sudo,audio,dip,video,plugdev,netdev
+    comment: "admin"
+    generate_ssh_key: yes
+    ssh_key_bits: 4096
+    ssh_key_file: .ssh/id_rsa
+    shell: /bin/bash
+    home: "/home/scicd"
+    authorized_keys:
+    - "ssh-rsa  AAAAB3NzaC1yc2EAAAADAQABAAACAQC2W744zq4uIU/dQsSdGeweFPE+w3p3bLD/LEGQoMcsyrlxTwEZJfq1petcH5gEgH2n0T2SyFJ+AtIFbuxZXfSrCg/UJj9M6dirBdFAjPMHwl5pLJcyCoos7h+NosHn8o+1t0U76rp0pzTgMfwb8mX5M1Wigl7wrTt0w9+qHNcFIVtMPv7KTtfPunkkZtzd3kk1QoE6muRTRpm6CKDwI/AO77qW/TQtwhTpXZnQD8BPlQx7rDliC6hFeqP2ARnvdyAOQmjSEJvq3whD+GnkxMpN3RdboJBaEZcRkDug1ZvawYHf0zfz4DFyb+5RmGFxPG5gDftgFOYL/YfaIu/qj5t41xKm4xFS9bQBCA86a8gaRTWIbrc133E1b/c1WnWVfbvCRae7wP5eAUfTMYndGFHu4hCm+PwVSUvwXhAZJniSpajjZYJO7flmCegYD5dNu7QXU5GBp39v9pDbGSxErRen+0XDF1pIpW/YBrgDoJiuG8ZyzBZujHjkOeGFGj99pngZp29dAPMgFZw3jGJ91uRddDzLTodA2eQQgOQJHv2yUpHoBXZZq0SJe9U6ohAndIsJ9jqLdGAkqlYDPHKqjZ4TDjKNXpS6U0n1mbNIfw0Vsp50t1QZ5L38KKnZuJvPhKa+SI9Nc2QtYBX/ourMGCNUst5J9IWlkbRaj/fEnrzFjw== scicd@endtropi"
+  # these will be auto installed with apt
+  dependencies:
+  - fail2ban
+  - arpwatch
+  - ufw
+  - openssh-server
+  - pass
+  - logwatch
+  cron:
+    fs_check:
+      threshold0: 90
+  # the role  will apply these settings to the kernel:
+  sysctl:
+  # IP Spoofing protection
+  - "net.ipv4.conf.all.rp_filter = 1"
+  - "net.ipv4.conf.default.rp_filter = 1"
+  # Ignore ICMP broadcast requests
+  - "net.ipv4.icmp_echo_ignore_broadcasts = 1"
+  # Disable source packet routing
+  - "net.ipv4.conf.all.accept_source_route = 0"
+  - "net.ipv6.conf.all.accept_source_route = 0"
+  - "net.ipv4.conf.default.accept_source_route = 0"
+  - "net.ipv6.conf.default.accept_source_route = 0"
+  # Ignore send redirects
+  - "net.ipv4.conf.all.send_redirects = 0"
+  - "net.ipv4.conf.default.send_redirects = 0"
+  # Block SYN attacks
+  - "net.ipv4.tcp_syncookies = 1"
+  - "net.ipv4.tcp_max_syn_backlog = 2048"
+  - "net.ipv4.tcp_synack_retries = 2"
+  - "net.ipv4.tcp_syn_retries = 5"
+  # Log Martians
+  - "net.ipv4.conf.all.log_martians = 1"
+  - "net.ipv4.icmp_ignore_bogus_error_responses = 1"
+  # Ignore ICMP redirects
+  - "net.ipv4.conf.all.accept_redirects = 0"
+  - "net.ipv6.conf.all.accept_redirects = 0"
+  - "net.ipv4.conf.default.accept_redirects = 0"
+  - "net.ipv6.conf.default.accept_redirects = 0"
+  # Ignore Directed pings
+  - "net.ipv4.icmp_echo_ignore_all = 1"
+  arpwatch:
+    conf: "/etc/default/arpwatch"
+  fail2ban:
+    ssh_jail: true
+  ufw:
+    logging: true
+    defaults:
+      IPV6: "yes"
+      DEFAULT_INPUT_POLICY: '"DROP"'
+      DEFAULT_OUTPUT_POLICY: '"ACCEPT"'
+      DEFAULT_FORWARD_POLICY: '"DROP"'
+    allow:
+    - 22/tcp
+    complex:
+    - "allow in from 10.10.10.1 to any port 80"
+  sshd:
+    # these settings will  be added to ssh server config file
+    conf: "/etc/ssh/sshd_config"
+    Port: 22
+    PasswordAuthentication: "no"
+    PermitRootLogin: "prohibit-password"
+    PermitTunnel: "no"
+    MaxAuthTries: 2
+    MaxSessions: 2
+    AllowAgentForwarding: "yes"
+    AllowTcpForwarding: "yes"
+    X11Forwarding: "yes"
+    PermitTTY: "yes"
+    TCPKeepAlive: "yes"
+    AuthorizedKeysFile: "/etc/ssh/authorized_keys/%u"
+    remote_users_allowed:
+    - "scicd"
+    - "ubuntu"
+  pam_time:
+    # see: man time.conf
+    # apply pam_time policies to
+    # these service's pam.d modules:
+    services:
+    - sshd
+    time: "!Al2200-0600"
+    # apply to users which are not scicd
+    users: "!scicd"
+    ttys: "*"
+  # honeypot:
+  #   fake_user:
+  #     name: "admin"
+  #     comment: "admin@localhost"
+  #     homedir: "/home/admin"

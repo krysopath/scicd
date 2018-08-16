@@ -1,0 +1,101 @@
+#!/bin/bash
+set -Exuo pipefail
+
+. ~/.aws_ses_env #noqa
+
+threshold0=${FS_THRESHOLD0}
+fs2check=(
+	"/"
+	"/home"
+	"/var"
+	"/tmp"
+	"/boot"
+)
+
+aws_smtp=${SES_SMTP_HOST}
+pw="$(echo -n "${SES_SMTP_SECRET}" | base64)"
+from="gve@3yourmind.com"
+cc="gve@3yourmind.com"
+user="$(echo -n "${SES_SMTP_USER}" | base64)"
+
+err_report() {
+		logger "health_check: error on line $1"
+		rc=1
+}
+
+trap 'err_report $LINENO' ERR
+
+send_ses_email () {
+	openssl s_client \
+		-crlf \
+		-quiet \
+		-starttls smtp \
+		-connect "${SES_SMTP_HOST}:${SES_SMTP_PORT}" \
+	<<< "${1}"
+}
+
+create_ses_email () {
+	lines=""
+	for fs in "${@}"
+	do
+		data="$(df -h ${fs} | tail -n 1)"
+		device="$(echo ${data} | awk '{print $1}')"
+		health="$(echo ${data} | awk '{print $5}')"
+		lines+="${fs} on ${device}: ${health}, "
+	done
+	hostname="$(hostname)"
+	echo -e this here "${lines}"
+	#
+	# since i like beauty in heredocs, we must have tabs and not spaces
+	# if you change that fact, deal with the indentational consequences
+	# e.g: <<-EOF
+	read -r -d "" EMAIL <<-EOF
+	EHLO ${aws_smtp}
+	AUTH LOGIN
+	${user}
+	${pw}
+	MAIL FROM: ${from}
+	RCPT TO: ${cc}
+	DATA
+	From: Georg vom Endt <${from}>
+	To: ${cc}
+	Subject: ${hostname}: storage device reaching capacity limits
+
+	${lines}
+	.
+	QUIT
+	EOF
+	echo "${EMAIL}"
+}
+
+threshold_met () {
+	logger "health_check: fs ${1} is >=80%: triggering alarm: ${2}"
+}
+
+
+rc=0
+alarms_for=""
+for fs in "${fs2check[@]}"
+do
+	data="$(df -h ${fs} | tail -n 1)"
+	fs_percentage="$(\
+		echo ${data} \
+	| awk '{print $5}' \
+	| tr -d "%" \
+	)"
+	if test "${fs_percentage}" -ge "${threshold0}"
+	then
+		alarms_for+="${fs} "
+		threshold_met "${fs}" "${data}"
+		rc=1
+	else
+		logger "health_check: fs ${fs} is okay"
+	fi
+done
+
+if test $rc -ge 1
+then
+	logger "health_check: fs: free capacity : sending hate mail"
+	send_ses_email "$(create_ses_email ${alarms_for})"
+	exit 1
+fi

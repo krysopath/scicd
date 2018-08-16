@@ -1,0 +1,30 @@
+---
+general:
+  do_ansible_backups: true
+
+ufw:
+  allow_nets:
+  - 10.0.0.0/8
+  - 192.168.0.0/16
+
+sshd:
+  remote_users_allowed:
+  - "scicd"
+  - "gve"
+
+up2date:
+  env_packages:
+    apt:
+    - fail2ban
+    - pass
+    - logwatch
+    - tmux
+    - gnupg
+    - mtr
+    - nmap
+    - sshfs
+    - apparmor-profiles
+    - apparmor-utils
+    pip:
+    - httpie
+    - ansible

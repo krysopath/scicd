@@ -1,0 +1,8 @@
+---
+# disabling usb automount to reduce attack surface
+
+- name: no automatic usb device andling by the kernel
+  cron:
+    name: "no usb auto"
+    reboot: true
+    job: "echo 0 > /sys/bus/usb/drivers_autoprobe"

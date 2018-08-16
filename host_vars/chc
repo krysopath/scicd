@@ -1,0 +1,9 @@
+sshd:
+  remote_users_allowed:
+  - "scicd"
+  - "ubuntu"
+  - "alex"
+
+hardened:
+  pam_time:
+    users: "!scicd&alex"

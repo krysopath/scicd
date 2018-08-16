@@ -1,0 +1,9 @@
+---
+pam_time:
+  state: present
+  services:
+  - sshd
+  time: "!Al2200-0600"
+  # apply to users which are not scicd
+  users: "!scicd"
+  ttys: "*"

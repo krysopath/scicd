@@ -1,0 +1,13 @@
+#!/bin/bash
+echo "${@}"
+set -Euox pipefail
+run_pipeline () {
+  rm scicd.log
+  ansible-playbook -f 6 -i "${@}" 2>&1 | tee scicd.log
+}
+if test ! -e .lock-cicd
+then
+  echo "${@}" > .lock-cicd
+  run_pipeline "${@}"
+  rm .lock-cicd
+fi

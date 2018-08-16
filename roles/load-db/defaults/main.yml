@@ -1,0 +1,15 @@
+load_db:
+  from:
+    database: ""
+    login_host: ""
+    login_port: 3306
+    login_user: ""
+    login_password: ""
+  to:
+    database: "threeyd"
+    login_host: "127.0.0.1"
+    login_port: 3306
+    login_user: "threeyd"
+    login_password: "threeyd"
+  dump_file: "dumplings.sql"
+  load: false

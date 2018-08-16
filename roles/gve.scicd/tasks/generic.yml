@@ -1,0 +1,48 @@
+---
+- name: provide scicd group
+  group:
+    name: "{{ admin_user.group }}"
+    state: "{{ scicd.state }}"
+
+- name: create scicd user
+  become: yes
+  user:
+    state: "{{ scicd.state }}"
+    system: no
+    groups: "{{ admin_user.groups }}"
+    group: "{{ admin_user.group }}"
+    name: "{{ admin_user.name }}"
+    comment: "{{ admin_user.comment }}"
+    generate_ssh_key: "{{ admin_user.generate_ssh_key }}"
+    ssh_key_bits: "{{ admin_user.ssh_key_bits }}"
+    ssh_key_file: "{{ admin_user.ssh_key_file }}"
+    shell: "{{ admin_user.shell }}"
+    home: "{{ admin_user.home }}"
+
+- name: Allow 'scicd' group to have passwordless sudo
+  become: yes
+  lineinfile:
+    dest: /etc/sudoers
+    state: "{{ scicd.state }}"
+    regexp: '^%scicd'
+    line: '%scicd ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
+- name: Set up multiple authorized keys
+  authorized_key:
+    user: "{{ admin_user.name }}"
+    state: "{{ scicd.state }}"
+    key: "{{ item }}"
+  with_items: "{{ admin_user.authorized_keys }}"
+
+- name: Bash aliases | Add aliases
+  become: "{{ admin_user.name }}"
+  lineinfile:
+    dest: "{{ admin_user.bash_aliases_path }}"
+    state: "{{ scicd.state }}"
+    create: yes
+    mode: 0644
+    line: 'alias {{ item.alias }}="{{ item.cmd }}"'
+    regexp: "^alias {{ item.alias }}="
+  with_items: "{{ admin_user.bash_aliases }}"
+  when: admin_user.bash_aliases

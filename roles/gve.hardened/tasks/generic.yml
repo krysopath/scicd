@@ -1,0 +1,45 @@
+---
+  # this sets shared memory mount options
+  # currently denys executable and suid bits
+  # useful to defend a running service against PRIVESC command
+  # strengthens the OS post exploit against further exploiting running
+  # services.
+  #
+  # on ubuntu 14.04 using /dev/shm locks the system during boot
+  # so we choose /run/shm, which works the same in later versions
+  # but does not lock 14.04
+
+# - name: securing shared memory via fstab mount options
+#   lineinfile:
+#     path: "/etc/fstab"
+#     line: "tmpfs /run/shm tmpfs defaults,noexec,nosuid 0 0"
+#     regexp: "^tmpfs "
+#     state: present
+#     backup: yes
+
+- name: securing shared memory via fstab noexec/nosuid/nodev mount options
+  become: yes
+  mount:
+    name: "tmpfs"
+    src: "/run/shm"
+    fstype: "tmpfs"
+    opts: "defaults,noexec,nosuid,nodev"
+    state: present
+
+  # this renders host.conf, - a file central to dns resolution
+  # we switch the order from "bind, hosts" to "hosts, bind"
+  # so now /etc/hosts takes precedence over name servers
+  # additionally we enable nospoof:
+  # To guard against DNS spoofing, the resolver may
+  # be configured to check if the original IP address
+  # is in fact associated with the hostname obtained.
+  # If not, the name is rejected and an error returned.
+- name: rendering host.conf to mitigate IP spoofing
+  become: yes
+  template:
+    src: templates/host.conf.j2
+    dest: /etc/host.conf
+    owner: root
+    group: root
+    mode: 0655
+    backup: "{{general.do_ansible_backups}}"

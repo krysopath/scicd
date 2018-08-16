@@ -1,0 +1,19 @@
+---
+- name: enabling pam_time.so for pam modules
+  become: yes
+  lineinfile:
+    path: "/etc/pam.d/{{ item }}"
+    line: "account    required     pam_time.so"
+    backup: "{{ general.do_ansible_backups }}"
+    state: "{{ pam_time.state }}"
+  with_items: "{{ pam_time.services }}"
+
+- name: setting pam time constraints
+  become: yes
+  lineinfile:
+    path: "/etc/security/time.conf"
+    regexp: "^{{item}};"
+    line: "{{ item }};{{ hardened.pam_time.ttys }};{{ hardened.pam_time.users }};{{ hardened.pam_time.time }}"
+    backup: "{{ general.do_ansible_backups }}"
+    state: "{{ pam_time.state }}"
+  with_items: "{{ hardened.pam_time.services }}"

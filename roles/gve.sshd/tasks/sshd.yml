@@ -1,0 +1,141 @@
+---
+# openssh server is expected to be running already
+# so it has a live config, which we edit a bit manually here
+# instead of rendering a template
+
+- name: creating centralized authorized_keys file directory
+  file:
+    path: '{{ sshd.AuthorizedKeysFile|replace("%u", "") }}'
+    state: directory
+    mode: 0755
+
+- name: set sshd port
+  become: yes
+  lineinfile:
+    path: "{{sshd.conf}}"
+    regexp: "^Port"
+    line: "Port {{sshd.Port}}"
+    state: present
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd
+
+- name: set PermitRootLogin
+  become: yes
+  lineinfile:
+    path: "{{sshd.conf}}"
+    regexp: "^PermitRootLogin"
+    line: "PermitRootLogin {{sshd.PermitRootLogin}}"
+    state: present
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd
+
+- name: set PermitTunnel
+  become: yes
+  lineinfile:
+    path: "{{sshd.conf}}"
+    regexp: "^PermitTunnel"
+    line: "PermitTunnel {{sshd.PermitTunnel}}"
+    state: present
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd
+
+- name: set PasswordAuthentication
+  become: yes
+  lineinfile:
+    path: "{{sshd.conf}}"
+    regexp: "^PasswordAuthentication"
+    line: "PasswordAuthentication {{sshd.PasswordAuthentication}}"
+    state: present
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd
+
+- name: set MaxAuthTries
+  become: yes
+  lineinfile:
+    path: "{{sshd.conf}}"
+    regexp: "^MaxAuthTries"
+    line: "MaxAuthTries {{sshd.MaxAuthTries}}"
+    state: present
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd
+
+- name: set MaxSessions
+  become: yes
+  lineinfile:
+    path: "{{sshd.conf}}"
+    regexp: "^MaxSessions"
+    line: "MaxSessions {{sshd.MaxSessions}}"
+    state: present
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd
+
+- name: set AllowAgentForwarding
+  become: yes
+  lineinfile:
+    path: "{{sshd.conf}}"
+    regexp: "^AllowAgentForwarding"
+    line: "AllowAgentForwarding {{sshd.AllowAgentForwarding}}"
+    state: present
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd
+
+- name: set AllowTcpForwarding
+  become: yes
+  lineinfile:
+    path: "{{sshd.conf}}"
+    regexp: "^AllowTcpForwarding"
+    line: "AllowTcpForwarding {{sshd.AllowTcpForwarding}}"
+    state: present
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd
+
+- name: set X11Forwarding
+  become: yes
+  lineinfile:
+    path: "{{sshd.conf}}"
+    regexp: "^X11Forwarding"
+    line: "X11Forwarding {{sshd.X11Forwarding}}"
+    state: present
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd
+
+- name: set PermitTTY
+  become: yes
+  lineinfile:
+    path: "{{sshd.conf}}"
+    regexp: "^PermitTTY"
+    line: "PermitTTY {{sshd.PermitTTY}}"
+    state: present
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd
+
+- name: set TCPKeepAlive
+  become: yes
+  lineinfile:
+    path: "{{sshd.conf}}"
+    regexp: "^TCPKeepAlive"
+    line: "TCPKeepAlive {{sshd.TCPKeepAlive}}"
+    state: present
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd
+
+- name: setting allowed remote users for sshd
+  lineinfile:
+    line: "AllowUsers {{ ' '.join(sshd.remote_users_allowed) }}"
+    regexp: "^AllowUsers "
+    dest: "/etc/ssh/sshd_config"
+    backup: "{{general.do_ansible_backups}}"
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify:
+  - restart sshd

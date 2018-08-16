@@ -1,0 +1,118 @@
+---
+- name: setting IPV6 support
+  become: yes
+  lineinfile:
+    path: "{{ ufw.defaults_path }}"
+    line: "IPV6={{ ufw.defaults.IPV6 }}"
+    regexp: "^IPV6="
+    state: present
+    backup: "{{ general.do_ansible_backups }}"
+
+- name: setting input policy support
+  become: yes
+  lineinfile:
+    path: "{{ ufw.defaults_path }}"
+    line: "DEFAULT_INPUT_POLICY={{ ufw.defaults.DEFAULT_INPUT_POLICY }}"
+    regexp: "^DEFAULT_INPUT_POLICY="
+    state: present
+    backup: "{{ general.do_ansible_backups }}"
+
+- name: setting output policy support
+  become: yes
+  lineinfile:
+    path: "{{ ufw.defaults_path }}"
+    line: "DEFAULT_OUTPUT_POLICY={{ ufw.defaults.DEFAULT_OUTPUT_POLICY }}"
+    regexp: "^DEFAULT_OUTPUT_POLICY="
+    state: present
+    backup: "{{ general.do_ansible_backups }}"
+
+- name: setting forward policy support
+  become: yes
+  lineinfile:
+    path: "{{ ufw.defaults_path }}"
+    line: "DEFAULT_FORWARD_POLICY={{ ufw.defaults.DEFAULT_FORWARD_POLICY }}"
+    regexp: "^DEFAULT_FORWARD_POLICY="
+    state: present
+    backup: "{{ general.do_ansible_backups }}"
+
+- name: Set logging for ufw
+  become: yes
+  ufw:
+    logging: "{{ ufw.logging }}"
+
+- name: Configure ufw defaults
+  become: yes
+  ufw:
+    direction: "{{ item.direction }}"
+    policy: "{{ item.policy }}"
+  with_items:
+  - { direction: 'incoming', policy: 'deny' }
+  - { direction: 'outgoing', policy: 'allow' }
+  - { direction: 'routed', policy: 'deny' }
+  notify:
+  - restart ufw
+
+- name: limit ssh
+  become: yes
+  ufw:
+    rule: limit
+    port: ssh
+    proto: tcp
+
+- name: allow ssh
+  become: yes
+  ufw:
+    rule: allow
+    port: ssh
+    proto: tcp
+
+- name: allow specific ports
+  become: yes
+  ufw:
+    rule: allow
+    port: "{{ item.split('/')[0] }}"
+    proto: "{{ item.split('/')[1] }}"
+  with_items: "{{ ufw.allow_ports }}"
+  when: ufw.allow_ports
+
+- name: Allow all access from RFC1918 networks to this host
+  become: yes
+  ufw:
+    rule: allow
+    src: '{{ item }}'
+  with_items: "{{ ufw.allow_nets }}"
+  when: ufw.allow_nets
+
+- name: Deny access to udp port 514 from host 1.2.3.4 and include a comment
+  become: yes
+  ufw:
+    rule: deny
+    src: "{{ item }}"
+    comment: Blocked host "{{ item }}"
+  with_items: "{{ ufw.dropped_source }}"
+  when: ufw.dropped_source
+
+#- name: Allow incoming access to eth0 from 1.2.3.5 port 5469 to 1.2.3.4 port 5469
+  # ufw:
+  #   rule: allow
+  #   interface: eth0
+  #   direction: in
+  #   proto: udp
+  #   src: 1.2.3.5
+  #   from_port: 5469
+  #   dest: 1.2.3.4
+  #   to_port: 5469
+
+# Can be used to further restrict a global FORWARD policy set to allow
+# - name: Deny forwarded/routed traffic from subnet 1.2.3.0/24 to subnet 4.5.6.0/24
+#   ufw:
+#     rule: deny
+#     route: yes
+#     src: 1.2.3.0/24
+#     dest: 4.5.6.0/24
+
+- name: set allowed complex rule
+  become: yes
+  command: "ufw {{ item }}"
+  with_items: "{{ ufw.complex }}"
+  when: ufw.complex
