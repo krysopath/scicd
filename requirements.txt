@@ -1,4 +1,4 @@
 watchdog==0.8.3
-ansible==2.4.2.0
+ansible==2.4.5
 ansible-lint==3.4.20
 ansible-review==0.13.4
